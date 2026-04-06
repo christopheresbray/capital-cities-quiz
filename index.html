@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capital Cities Quiz</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 36px 32px;
+      max-width: 520px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .card-finish { padding: 48px 40px; }
+    .progress-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .progress-label { font-size: 13px; color: #888; }
+    .progress-track {
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .streak-info { font-size: 12px; color: #aaa; margin-bottom: 24px; min-height: 18px; }
+    .question-label {
+      color: #888;
+      font-size: 14px;
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .country-name {
+      margin: 0 0 32px;
+      font-size: 36px;
+      color: #1a1a2e;
+      font-weight: 700;
+    }
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 16px 48px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-reveal {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn-correct {
+      background: #2e7d32;
+      color: white;
+      border-radius: 12px;
+      padding: 14px 36px;
+      font-size: 17px;
+    }
+    .btn-wrong {
+      background: #c62828;
+      color: white;
+      border-radius: 12px;
+      padding: 14px 36px;
+      font-size: 17px;
+    }
+    .btn-restart {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 14px 36px;
+      font-size: 17px;
+    }
+    .btn-skip {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 14px;
+      margin-top: 16px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .answer-box {
+      background: #f0f4ff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .answer-text { margin: 0; font-size: 32px; font-weight: 700; color: #4a3f8a; }
+    .did-you { color: #666; font-size: 15px; margin: 0 0 16px; }
+    .answer-buttons { display: flex; gap: 12px; justify-content: center; }
+    .emoji-big { font-size: 56px; margin-bottom: 8px; }
+    .finish-title { margin: 0 0 8px; color: #1a1a2e; font-size: 28px; }
+    .finish-subtitle { color: #555; font-size: 18px; margin: 0 0 24px; }
+    .stats-row { display: flex; gap: 16px; justify-content: center; margin-bottom: 24px; }
+    .stat-box { border-radius: 12px; padding: 12px 24px; }
+    .stat-box-green { background: #e8f5e9; }
+    .stat-box-red { background: #fce4ec; }
+    .stat-box-orange { background: #fff3e0; }
+    .stat-num { font-size: 28px; font-weight: 700; }
+    .stat-num-green { color: #2e7d32; }
+    .stat-num-red { color: #c62828; }
+    .stat-num-orange { color: #e65100; }
+    .stat-label { font-size: 13px; color: #555; }
+    .trouble-section { text-align: left; margin-bottom: 24px; }
+    .trouble-heading { font-size: 14px; font-weight: 600; color: #888; margin-bottom: 8px; }
+    .trouble-list {
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 12px 16px;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 14px;
+      color: #444;
+      line-height: 1.8;
+    }
+    .trouble-row { display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+
+  <script>
+    const { useState, useCallback } = React;
+    const e = React.createElement;
+
+    const COUNTRIES = [
+      {country:"Afghanistan",capital:"Kabul"},{country:"Albania",capital:"Tirana"},{country:"Algeria",capital:"Algiers"},{country:"Andorra",capital:"Andorra la Vella"},{country:"Angola",capital:"Luanda"},{country:"Antigua and Barbuda",capital:"St. John's"},{country:"Argentina",capital:"Buenos Aires"},{country:"Armenia",capital:"Yerevan"},{country:"Australia",capital:"Canberra"},{country:"Austria",capital:"Vienna"},{country:"Azerbaijan",capital:"Baku"},{country:"Bahamas",capital:"Nassau"},{country:"Bahrain",capital:"Manama"},{country:"Bangladesh",capital:"Dhaka"},{country:"Barbados",capital:"Bridgetown"},{country:"Belarus",capital:"Minsk"},{country:"Belgium",capital:"Brussels"},{country:"Belize",capital:"Belmopan"},{country:"Benin",capital:"Porto-Novo"},{country:"Bhutan",capital:"Thimphu"},{country:"Bolivia",capital:"Sucre"},{country:"Bosnia and Herzegovina",capital:"Sarajevo"},{country:"Botswana",capital:"Gaborone"},{country:"Brazil",capital:"Bras\u00edlia"},{country:"Brunei",capital:"Bandar Seri Begawan"},{country:"Bulgaria",capital:"Sofia"},{country:"Burkina Faso",capital:"Ouagadougou"},{country:"Burundi",capital:"Gitega"},{country:"Cabo Verde",capital:"Praia"},{country:"Cambodia",capital:"Phnom Penh"},{country:"Cameroon",capital:"Yaound\u00e9"},{country:"Canada",capital:"Ottawa"},{country:"Central African Republic",capital:"Bangui"},{country:"Chad",capital:"N'Djamena"},{country:"Chile",capital:"Santiago"},{country:"China",capital:"Beijing"},{country:"Colombia",capital:"Bogot\u00e1"},{country:"Comoros",capital:"Moroni"},{country:"Congo (Democratic Republic)",capital:"Kinshasa"},{country:"Congo (Republic)",capital:"Brazzaville"},{country:"Costa Rica",capital:"San Jos\u00e9"},{country:"Croatia",capital:"Zagreb"},{country:"Cuba",capital:"Havana"},{country:"Cyprus",capital:"Nicosia"},{country:"Czech Republic",capital:"Prague"},{country:"Denmark",capital:"Copenhagen"},{country:"Djibouti",capital:"Djibouti"},{country:"Dominica",capital:"Roseau"},{country:"Dominican Republic",capital:"Santo Domingo"},{country:"East Timor",capital:"Dili"},{country:"Ecuador",capital:"Quito"},{country:"Egypt",capital:"Cairo"},{country:"El Salvador",capital:"San Salvador"},{country:"Equatorial Guinea",capital:"Malabo"},{country:"Eritrea",capital:"Asmara"},{country:"Estonia",capital:"Tallinn"},{country:"Eswatini",capital:"Mbabane"},{country:"Ethiopia",capital:"Addis Ababa"},{country:"Fiji",capital:"Suva"},{country:"Finland",capital:"Helsinki"},{country:"France",capital:"Paris"},{country:"Gabon",capital:"Libreville"},{country:"Gambia",capital:"Banjul"},{country:"Georgia",capital:"Tbilisi"},{country:"Germany",capital:"Berlin"},{country:"Ghana",capital:"Accra"},{country:"Greece",capital:"Athens"},{country:"Grenada",capital:"St. George's"},{country:"Guatemala",capital:"Guatemala City"},{country:"Guinea",capital:"Conakry"},{country:"Guinea-Bissau",capital:"Bissau"},{country:"Guyana",capital:"Georgetown"},{country:"Haiti",capital:"Port-au-Prince"},{country:"Honduras",capital:"Tegucigalpa"},{country:"Hungary",capital:"Budapest"},{country:"Iceland",capital:"Reykjavik"},{country:"India",capital:"New Delhi"},{country:"Indonesia",capital:"Jakarta"},{country:"Iran",capital:"Tehran"},{country:"Iraq",capital:"Baghdad"},{country:"Ireland",capital:"Dublin"},{country:"Israel",capital:"Jerusalem"},{country:"Italy",capital:"Rome"},{country:"Ivory Coast",capital:"Yamoussoukro"},{country:"Jamaica",capital:"Kingston"},{country:"Japan",capital:"Tokyo"},{country:"Jordan",capital:"Amman"},{country:"Kazakhstan",capital:"Astana"},{country:"Kenya",capital:"Nairobi"},{country:"Kiribati",capital:"Tarawa"},{country:"Kosovo",capital:"Pristina"},{country:"Kuwait",capital:"Kuwait City"},{country:"Kyrgyzstan",capital:"Bishkek"},{country:"Laos",capital:"Vientiane"},{country:"Latvia",capital:"Riga"},{country:"Lebanon",capital:"Beirut"},{country:"Lesotho",capital:"Maseru"},{country:"Liberia",capital:"Monrovia"},{country:"Libya",capital:"Tripoli"},{country:"Liechtenstein",capital:"Vaduz"},{country:"Lithuania",capital:"Vilnius"},{country:"Luxembourg",capital:"Luxembourg City"},{country:"Madagascar",capital:"Antananarivo"},{country:"Malawi",capital:"Lilongwe"},{country:"Malaysia",capital:"Kuala Lumpur"},{country:"Maldives",capital:"Mal\u00e9"},{country:"Mali",capital:"Bamako"},{country:"Malta",capital:"Valletta"},{country:"Marshall Islands",capital:"Majuro"},{country:"Mauritania",capital:"Nouakchott"},{country:"Mauritius",capital:"Port Louis"},{country:"Mexico",capital:"Mexico City"},{country:"Micronesia",capital:"Palikir"},{country:"Moldova",capital:"Chi\u0219in\u0103u"},{country:"Monaco",capital:"Monaco"},{country:"Mongolia",capital:"Ulaanbaatar"},{country:"Montenegro",capital:"Podgorica"},{country:"Morocco",capital:"Rabat"},{country:"Mozambique",capital:"Maputo"},{country:"Myanmar",capital:"Naypyidaw"},{country:"Namibia",capital:"Windhoek"},{country:"Nauru",capital:"Yaren"},{country:"Nepal",capital:"Kathmandu"},{country:"Netherlands",capital:"Amsterdam"},{country:"New Zealand",capital:"Wellington"},{country:"Nicaragua",capital:"Managua"},{country:"Niger",capital:"Niamey"},{country:"Nigeria",capital:"Abuja"},{country:"North Korea",capital:"Pyongyang"},{country:"North Macedonia",capital:"Skopje"},{country:"Norway",capital:"Oslo"},{country:"Oman",capital:"Muscat"},{country:"Pakistan",capital:"Islamabad"},{country:"Palau",capital:"Ngerulmud"},{country:"Palestine",capital:"Ramallah"},{country:"Panama",capital:"Panama City"},{country:"Papua New Guinea",capital:"Port Moresby"},{country:"Paraguay",capital:"Asunci\u00f3n"},{country:"Peru",capital:"Lima"},{country:"Philippines",capital:"Manila"},{country:"Poland",capital:"Warsaw"},{country:"Portugal",capital:"Lisbon"},{country:"Qatar",capital:"Doha"},{country:"Romania",capital:"Bucharest"},{country:"Russia",capital:"Moscow"},{country:"Rwanda",capital:"Kigali"},{country:"Saint Kitts and Nevis",capital:"Basseterre"},{country:"Saint Lucia",capital:"Castries"},{country:"Saint Vincent and the Grenadines",capital:"Kingstown"},{country:"Samoa",capital:"Apia"},{country:"San Marino",capital:"San Marino"},{country:"S\u00e3o Tom\u00e9 and Pr\u00edncipe",capital:"S\u00e3o Tom\u00e9"},{country:"Saudi Arabia",capital:"Riyadh"},{country:"Senegal",capital:"Dakar"},{country:"Serbia",capital:"Belgrade"},{country:"Seychelles",capital:"Victoria"},{country:"Sierra Leone",capital:"Freetown"},{country:"Singapore",capital:"Singapore"},{country:"Slovakia",capital:"Bratislava"},{country:"Slovenia",capital:"Ljubljana"},{country:"Solomon Islands",capital:"Honiara"},{country:"Somalia",capital:"Mogadishu"},{country:"South Africa",capital:"Pretoria"},{country:"South Korea",capital:"Seoul"},{country:"South Sudan",capital:"Juba"},{country:"Spain",capital:"Madrid"},{country:"Sri Lanka",capital:"Sri Jayawardenepura Kotte"},{country:"Sudan",capital:"Khartoum"},{country:"Suriname",capital:"Paramaribo"},{country:"Sweden",capital:"Stockholm"},{country:"Switzerland",capital:"Bern"},{country:"Syria",capital:"Damascus"},{country:"Taiwan",capital:"Taipei"},{country:"Tajikistan",capital:"Dushanbe"},{country:"Tanzania",capital:"Dodoma"},{country:"Thailand",capital:"Bangkok"},{country:"Togo",capital:"Lom\u00e9"},{country:"Tonga",capital:"Nuku\u02bbalofa"},{country:"Trinidad and Tobago",capital:"Port of Spain"},{country:"Tunisia",capital:"Tunis"},{country:"Turkey",capital:"Ankara"},{country:"Turkmenistan",capital:"Ashgabat"},{country:"Tuvalu",capital:"Funafuti"},{country:"Uganda",capital:"Kampala"},{country:"Ukraine",capital:"Kyiv"},{country:"United Arab Emirates",capital:"Abu Dhabi"},{country:"United Kingdom",capital:"London"},{country:"United States",capital:"Washington, D.C."},{country:"Uruguay",capital:"Montevideo"},{country:"Uzbekistan",capital:"Tashkent"},{country:"Vanuatu",capital:"Port Vila"},{country:"Vatican City",capital:"Vatican City"},{country:"Venezuela",capital:"Caracas"},{country:"Vietnam",capital:"Hanoi"},{country:"Yemen",capital:"Sana'a"},{country:"Zambia",capital:"Lusaka"},{country:"Zimbabwe",capital:"Harare"}
+    ];
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const MASTERY_THRESHOLD = 3;
+    const REINSERT_DISTANCE = 10;
+
+    function App() {
+      const [queue, setQueue] = useState(() => shuffle(COUNTRIES));
+      const [index, setIndex] = useState(0);
+      const [revealed, setRevealed] = useState(false);
+      const [score, setScore] = useState({ correct: 0, incorrect: 0 });
+      const [finished, setFinished] = useState(false);
+      const [streaks, setStreaks] = useState({});
+      const [mastered, setMastered] = useState(new Set());
+      const [troubleCountries, setTroubleCountries] = useState(new Set());
+
+      const current = index < queue.length ? queue[index] : null;
+      const totalMastered = mastered.size;
+      const totalCountries = COUNTRIES.length;
+      const isDone = !current || totalMastered === totalCountries;
+
+      const handleNext = useCallback(function(gotIt) {
+        const country = current.country;
+        const currentStreak = streaks[country] || 0;
+
+        setScore({ correct: score.correct + (gotIt ? 1 : 0), incorrect: score.incorrect + (gotIt ? 0 : 1) });
+
+        const isTrouble = troubleCountries.has(country);
+
+        if (gotIt) {
+          if (!isTrouble) {
+            setMastered(function(prev) { return new Set([...prev, country]); });
+          } else {
+            const newStreak = currentStreak + 1;
+            setStreaks(Object.assign({}, streaks, { [country]: newStreak }));
+            if (newStreak >= MASTERY_THRESHOLD) {
+              setMastered(function(prev) { return new Set([...prev, country]); });
+            } else {
+              var nq = queue.slice();
+              nq.push(current);
+              setQueue(nq);
+            }
+          }
+          setIndex(index + 1);
+          setRevealed(false);
+        } else {
+          setStreaks(Object.assign({}, streaks, { [country]: 0 }));
+          setTroubleCountries(function(prev) { return new Set([...prev, country]); });
+          var nq2 = queue.slice();
+          var insertAt = Math.min(index + 1 + REINSERT_DISTANCE, nq2.length);
+          nq2.splice(insertAt, 0, current);
+          setQueue(nq2);
+          setIndex(index + 1);
+          setRevealed(false);
+        }
+      }, [index, queue, current, score, streaks, troubleCountries]);
+
+      function handleRestart() {
+        setQueue(shuffle(COUNTRIES));
+        setIndex(0);
+        setRevealed(false);
+        setScore({ correct: 0, incorrect: 0 });
+        setStreaks({});
+        setMastered(new Set());
+        setTroubleCountries(new Set());
+        setFinished(false);
+      }
+
+      // Finished screen
+      if (finished || isDone) {
+        var troubleList = [...troubleCountries].sort();
+        var pctMastered = Math.round((totalMastered / totalCountries) * 100);
+        var emoji = totalMastered === totalCountries ? "\uD83C\uDFC6" : totalMastered >= totalCountries * 0.8 ? "\uD83D\uDC4F" : "\uD83D\uDCAA";
+
+        return e("div", { className: "card card-finish" },
+          e("div", { className: "emoji-big" }, emoji),
+          e("h1", { className: "finish-title" }, "Quiz Complete!"),
+          e("p", { className: "finish-subtitle" },
+            "You mastered ", e("strong", null, totalMastered), " of ", e("strong", null, totalCountries), " countries"
+          ),
+          e("div", { className: "stats-row" },
+            e("div", { className: "stat-box stat-box-green" },
+              e("div", { className: "stat-num stat-num-green" }, score.correct),
+              e("div", { className: "stat-label" }, "Correct")
+            ),
+            e("div", { className: "stat-box stat-box-red" },
+              e("div", { className: "stat-num stat-num-red" }, score.incorrect),
+              e("div", { className: "stat-label" }, "Incorrect")
+            ),
+            e("div", { className: "stat-box stat-box-orange" },
+              e("div", { className: "stat-num stat-num-orange" }, troubleList.length),
+              e("div", { className: "stat-label" }, "Tricky ones")
+            )
+          ),
+          troubleList.length > 0 && e("div", { className: "trouble-section" },
+            e("p", { className: "trouble-heading" }, "Countries you found tricky:"),
+            e("div", { className: "trouble-list" },
+              troubleList.map(function(c) {
+                var entry = COUNTRIES.find(function(x) { return x.country === c; });
+                var didMaster = mastered.has(c);
+                return e("div", { key: c, className: "trouble-row" },
+                  e("span", null, c, " \u2192 ", e("strong", null, entry ? entry.capital : "")),
+                  e("span", null, didMaster ? "\u2705" : "\u274C")
+                );
+              })
+            )
+          ),
+          e("button", { className: "btn btn-restart", onClick: handleRestart }, "Play Again")
+        );
+      }
+
+      // Quiz screen
+      var streakCount = streaks[current.country] || 0;
+      var isTroubleNow = troubleCountries.has(current.country);
+      var streakText = "";
+      if (isTroubleNow) {
+        var fires = "";
+        for (var i = 0; i < streakCount; i++) fires += "\uD83D\uDD25";
+        var circles = "";
+        for (var j = 0; j < MASTERY_THRESHOLD - streakCount; j++) circles += "\u26AA";
+        streakText = "Streak: " + fires + circles + " (" + streakCount + "/" + MASTERY_THRESHOLD + " to master)";
+      }
+
+      return e("div", { className: "card" },
+        e("div", { className: "progress-row" },
+          e("span", { className: "progress-label" }, "Mastered: " + totalMastered + " / " + totalCountries),
+          e("span", { className: "progress-label" }, "\u2705 " + score.correct + "  \u274C " + score.incorrect)
+        ),
+        e("div", { className: "progress-track" },
+          e("div", { className: "progress-fill", style: { width: (totalMastered / totalCountries * 100) + "%" } })
+        ),
+        e("div", { className: "streak-info" }, streakText),
+        e("p", { className: "question-label" }, "What is the capital of\u2026"),
+        e("h1", { className: "country-name" }, current.country),
+
+        !revealed
+          ? e("div", null,
+              e("button", { className: "btn btn-reveal", onClick: function() { setRevealed(true); } }, "Reveal Answer"),
+              e("br", null),
+              e("button", { className: "btn-skip", onClick: function() {
+                var nq = queue.slice();
+                nq.push(current);
+                setQueue(nq);
+                setIndex(index + 1);
+              }}, "Skip this one")
+            )
+          : e("div", null,
+              e("div", { className: "answer-box" },
+                e("p", { className: "answer-text" }, current.capital)
+              ),
+              e("p", { className: "did-you" }, "Did you get it right?"),
+              e("div", { className: "answer-buttons" },
+                e("button", { className: "btn btn-correct", onClick: function() { handleNext(true); } }, "\u2713 Got it!"),
+                e("button", { className: "btn btn-wrong", onClick: function() { handleNext(false); } }, "\u2717 Nope")
+              )
+            )
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(e(App));
+  </script>
+</body>
+</html>
