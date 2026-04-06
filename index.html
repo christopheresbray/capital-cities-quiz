@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Capital Cities Voice Quiz</title>
+  <title>Capital Cities Quiz</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -30,8 +31,6 @@
     .streak-info { font-size: 12px; color: #aaa; margin-bottom: 24px; min-height: 18px; }
     .question-label { color: #888; font-size: 14px; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 1.5px; }
     .country-name { margin: 0 0 28px; font-size: 36px; color: #1a1a2e; font-weight: 700; }
-
-    /* Mic button */
     .mic-area { margin: 20px 0; }
     .mic-btn {
       width: 80px; height: 80px; border-radius: 50%; border: none;
@@ -39,52 +38,33 @@
       color: white; font-size: 36px; cursor: pointer;
       box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      position: relative;
     }
     .mic-btn:active { transform: scale(0.95); }
-    .mic-btn.listening {
-      animation: pulse 1.5s ease-in-out infinite;
-      box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.6);
-    }
+    .mic-btn.listening { animation: pulse 1.5s ease-in-out infinite; }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.6); }
       50% { box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
       100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
     }
     .mic-hint { font-size: 13px; color: #aaa; margin-top: 10px; }
-
-    /* Transcript */
-    .transcript {
-      font-size: 22px; font-weight: 600; color: #333; margin: 16px 0;
-      min-height: 34px;
-    }
-
-    /* Result feedback */
-    .result-box {
-      border-radius: 14px; padding: 18px 24px; margin: 16px 0;
-      font-size: 18px; font-weight: 600;
-    }
+    .transcript { font-size: 22px; font-weight: 600; color: #333; margin: 16px 0; min-height: 34px; }
+    .result-box { border-radius: 14px; padding: 18px 24px; margin: 16px 0; font-size: 18px; font-weight: 600; }
     .result-correct { background: #e8f5e9; color: #2e7d32; }
     .result-wrong { background: #fce4ec; color: #c62828; }
     .correct-answer { font-size: 15px; color: #555; margin-top: 8px; }
-
-    /* Buttons */
     .btn {
       border: none; border-radius: 12px; padding: 14px 36px;
       font-size: 17px; font-weight: 600; cursor: pointer;
       transition: transform 0.15s ease;
     }
     .btn:active { transform: scale(0.96); }
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
     .btn-skip {
       background: none; border: none; color: #aaa; font-size: 14px;
       margin-top: 14px; cursor: pointer; text-decoration: underline; padding: 0;
     }
-
-    /* Finish screen */
+    .answer-box { background: #f0f4ff; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; }
+    .answer-text { margin: 0; font-size: 32px; font-weight: 700; color: #4a3f8a; }
     .emoji-big { font-size: 56px; margin-bottom: 8px; }
     .finish-title { margin: 0 0 8px; color: #1a1a2e; font-size: 28px; }
     .finish-subtitle { color: #555; font-size: 18px; margin: 0 0 24px; }
@@ -105,541 +85,291 @@
       max-height: 200px; overflow-y: auto; font-size: 14px; color: #444; line-height: 1.8;
     }
     .trouble-row { display: flex; justify-content: space-between; }
-    .speak-btn {
-      background: none; border: 2px solid #ddd; border-radius: 10px;
-      padding: 6px 16px; font-size: 16px; cursor: pointer;
-      color: #667eea; margin-top: 6px;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .speak-btn:hover { background: #f0f4ff; border-color: #667eea; }
-
-    /* Mode toggle */
-    .mode-toggle {
-      display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;
-    }
+    .mode-toggle { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; }
     .mode-btn {
       padding: 8px 18px; border-radius: 20px; border: 2px solid #ddd;
       background: white; font-size: 13px; font-weight: 600; color: #888;
       cursor: pointer; transition: all 0.2s;
     }
-    .mode-btn.active {
-      border-color: #667eea; background: #f0f4ff; color: #667eea;
+    .mode-btn.active { border-color: #667eea; background: #f0f4ff; color: #667eea; }
+    .speak-btn {
+      background: none; border: 2px solid #ddd; border-radius: 10px;
+      padding: 6px 16px; font-size: 16px; cursor: pointer;
+      color: #667eea; margin-top: 8px;
+      transition: background 0.15s, border-color 0.15s;
     }
-
-    /* Browser warning */
-    .warning {
-      background: #fff3e0; border-radius: 12px; padding: 14px 18px;
-      font-size: 14px; color: #e65100; margin-bottom: 20px;
-    }
+    .speak-btn:hover { background: #f0f4ff; border-color: #667eea; }
+    .hint { font-size: 12px; color: #aaa; margin-top: 10px; }
   </style>
 </head>
 <body>
   <div id="root"></div>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-
   <script>
     var e = React.createElement;
-    var useState = React.useState;
-    var useCallback = React.useCallback;
-    var useEffect = React.useEffect;
-    var useRef = React.useRef;
+    var useState = React.useState, useCallback = React.useCallback, useEffect = React.useEffect, useRef = React.useRef;
 
     var COUNTRIES=[{country:"Afghanistan",capital:"Kabul"},{country:"Albania",capital:"Tirana"},{country:"Algeria",capital:"Algiers"},{country:"Andorra",capital:"Andorra la Vella"},{country:"Angola",capital:"Luanda"},{country:"Antigua and Barbuda",capital:"St. John's"},{country:"Argentina",capital:"Buenos Aires"},{country:"Armenia",capital:"Yerevan"},{country:"Australia",capital:"Canberra"},{country:"Austria",capital:"Vienna"},{country:"Azerbaijan",capital:"Baku"},{country:"Bahamas",capital:"Nassau"},{country:"Bahrain",capital:"Manama"},{country:"Bangladesh",capital:"Dhaka"},{country:"Barbados",capital:"Bridgetown"},{country:"Belarus",capital:"Minsk"},{country:"Belgium",capital:"Brussels"},{country:"Belize",capital:"Belmopan"},{country:"Benin",capital:"Porto-Novo"},{country:"Bhutan",capital:"Thimphu"},{country:"Bolivia",capital:"Sucre"},{country:"Bosnia and Herzegovina",capital:"Sarajevo"},{country:"Botswana",capital:"Gaborone"},{country:"Brazil",capital:"Bras\u00edlia"},{country:"Brunei",capital:"Bandar Seri Begawan"},{country:"Bulgaria",capital:"Sofia"},{country:"Burkina Faso",capital:"Ouagadougou"},{country:"Burundi",capital:"Gitega"},{country:"Cabo Verde",capital:"Praia"},{country:"Cambodia",capital:"Phnom Penh"},{country:"Cameroon",capital:"Yaound\u00e9"},{country:"Canada",capital:"Ottawa"},{country:"Central African Republic",capital:"Bangui"},{country:"Chad",capital:"N'Djamena"},{country:"Chile",capital:"Santiago"},{country:"China",capital:"Beijing"},{country:"Colombia",capital:"Bogot\u00e1"},{country:"Comoros",capital:"Moroni"},{country:"Congo (Democratic Republic)",capital:"Kinshasa"},{country:"Congo (Republic)",capital:"Brazzaville"},{country:"Costa Rica",capital:"San Jos\u00e9"},{country:"Croatia",capital:"Zagreb"},{country:"Cuba",capital:"Havana"},{country:"Cyprus",capital:"Nicosia"},{country:"Czech Republic",capital:"Prague"},{country:"Denmark",capital:"Copenhagen"},{country:"Djibouti",capital:"Djibouti"},{country:"Dominica",capital:"Roseau"},{country:"Dominican Republic",capital:"Santo Domingo"},{country:"East Timor",capital:"Dili"},{country:"Ecuador",capital:"Quito"},{country:"Egypt",capital:"Cairo"},{country:"El Salvador",capital:"San Salvador"},{country:"Equatorial Guinea",capital:"Malabo"},{country:"Eritrea",capital:"Asmara"},{country:"Estonia",capital:"Tallinn"},{country:"Eswatini",capital:"Mbabane"},{country:"Ethiopia",capital:"Addis Ababa"},{country:"Fiji",capital:"Suva"},{country:"Finland",capital:"Helsinki"},{country:"France",capital:"Paris"},{country:"Gabon",capital:"Libreville"},{country:"Gambia",capital:"Banjul"},{country:"Georgia",capital:"Tbilisi"},{country:"Germany",capital:"Berlin"},{country:"Ghana",capital:"Accra"},{country:"Greece",capital:"Athens"},{country:"Grenada",capital:"St. George's"},{country:"Guatemala",capital:"Guatemala City"},{country:"Guinea",capital:"Conakry"},{country:"Guinea-Bissau",capital:"Bissau"},{country:"Guyana",capital:"Georgetown"},{country:"Haiti",capital:"Port-au-Prince"},{country:"Honduras",capital:"Tegucigalpa"},{country:"Hungary",capital:"Budapest"},{country:"Iceland",capital:"Reykjavik"},{country:"India",capital:"New Delhi"},{country:"Indonesia",capital:"Jakarta"},{country:"Iran",capital:"Tehran"},{country:"Iraq",capital:"Baghdad"},{country:"Ireland",capital:"Dublin"},{country:"Israel",capital:"Jerusalem"},{country:"Italy",capital:"Rome"},{country:"Ivory Coast",capital:"Yamoussoukro"},{country:"Jamaica",capital:"Kingston"},{country:"Japan",capital:"Tokyo"},{country:"Jordan",capital:"Amman"},{country:"Kazakhstan",capital:"Astana"},{country:"Kenya",capital:"Nairobi"},{country:"Kiribati",capital:"Tarawa"},{country:"Kosovo",capital:"Pristina"},{country:"Kuwait",capital:"Kuwait City"},{country:"Kyrgyzstan",capital:"Bishkek"},{country:"Laos",capital:"Vientiane"},{country:"Latvia",capital:"Riga"},{country:"Lebanon",capital:"Beirut"},{country:"Lesotho",capital:"Maseru"},{country:"Liberia",capital:"Monrovia"},{country:"Libya",capital:"Tripoli"},{country:"Liechtenstein",capital:"Vaduz"},{country:"Lithuania",capital:"Vilnius"},{country:"Luxembourg",capital:"Luxembourg City"},{country:"Madagascar",capital:"Antananarivo"},{country:"Malawi",capital:"Lilongwe"},{country:"Malaysia",capital:"Kuala Lumpur"},{country:"Maldives",capital:"Mal\u00e9"},{country:"Mali",capital:"Bamako"},{country:"Malta",capital:"Valletta"},{country:"Marshall Islands",capital:"Majuro"},{country:"Mauritania",capital:"Nouakchott"},{country:"Mauritius",capital:"Port Louis"},{country:"Mexico",capital:"Mexico City"},{country:"Micronesia",capital:"Palikir"},{country:"Moldova",capital:"Chi\u0219in\u0103u"},{country:"Monaco",capital:"Monaco"},{country:"Mongolia",capital:"Ulaanbaatar"},{country:"Montenegro",capital:"Podgorica"},{country:"Morocco",capital:"Rabat"},{country:"Mozambique",capital:"Maputo"},{country:"Myanmar",capital:"Naypyidaw"},{country:"Namibia",capital:"Windhoek"},{country:"Nauru",capital:"Yaren"},{country:"Nepal",capital:"Kathmandu"},{country:"Netherlands",capital:"Amsterdam"},{country:"New Zealand",capital:"Wellington"},{country:"Nicaragua",capital:"Managua"},{country:"Niger",capital:"Niamey"},{country:"Nigeria",capital:"Abuja"},{country:"North Korea",capital:"Pyongyang"},{country:"North Macedonia",capital:"Skopje"},{country:"Norway",capital:"Oslo"},{country:"Oman",capital:"Muscat"},{country:"Pakistan",capital:"Islamabad"},{country:"Palau",capital:"Ngerulmud"},{country:"Palestine",capital:"Ramallah"},{country:"Panama",capital:"Panama City"},{country:"Papua New Guinea",capital:"Port Moresby"},{country:"Paraguay",capital:"Asunci\u00f3n"},{country:"Peru",capital:"Lima"},{country:"Philippines",capital:"Manila"},{country:"Poland",capital:"Warsaw"},{country:"Portugal",capital:"Lisbon"},{country:"Qatar",capital:"Doha"},{country:"Romania",capital:"Bucharest"},{country:"Russia",capital:"Moscow"},{country:"Rwanda",capital:"Kigali"},{country:"Saint Kitts and Nevis",capital:"Basseterre"},{country:"Saint Lucia",capital:"Castries"},{country:"Saint Vincent and the Grenadines",capital:"Kingstown"},{country:"Samoa",capital:"Apia"},{country:"San Marino",capital:"San Marino"},{country:"S\u00e3o Tom\u00e9 and Pr\u00edncipe",capital:"S\u00e3o Tom\u00e9"},{country:"Saudi Arabia",capital:"Riyadh"},{country:"Senegal",capital:"Dakar"},{country:"Serbia",capital:"Belgrade"},{country:"Seychelles",capital:"Victoria"},{country:"Sierra Leone",capital:"Freetown"},{country:"Singapore",capital:"Singapore"},{country:"Slovakia",capital:"Bratislava"},{country:"Slovenia",capital:"Ljubljana"},{country:"Solomon Islands",capital:"Honiara"},{country:"Somalia",capital:"Mogadishu"},{country:"South Africa",capital:"Pretoria"},{country:"South Korea",capital:"Seoul"},{country:"South Sudan",capital:"Juba"},{country:"Spain",capital:"Madrid"},{country:"Sri Lanka",capital:"Sri Jayawardenepura Kotte"},{country:"Sudan",capital:"Khartoum"},{country:"Suriname",capital:"Paramaribo"},{country:"Sweden",capital:"Stockholm"},{country:"Switzerland",capital:"Bern"},{country:"Syria",capital:"Damascus"},{country:"Taiwan",capital:"Taipei"},{country:"Tajikistan",capital:"Dushanbe"},{country:"Tanzania",capital:"Dodoma"},{country:"Thailand",capital:"Bangkok"},{country:"Togo",capital:"Lom\u00e9"},{country:"Tonga",capital:"Nuku\u02bbalofa"},{country:"Trinidad and Tobago",capital:"Port of Spain"},{country:"Tunisia",capital:"Tunis"},{country:"Turkey",capital:"Ankara"},{country:"Turkmenistan",capital:"Ashgabat"},{country:"Tuvalu",capital:"Funafuti"},{country:"Uganda",capital:"Kampala"},{country:"Ukraine",capital:"Kyiv"},{country:"United Arab Emirates",capital:"Abu Dhabi"},{country:"United Kingdom",capital:"London"},{country:"United States",capital:"Washington, D.C."},{country:"Uruguay",capital:"Montevideo"},{country:"Uzbekistan",capital:"Tashkent"},{country:"Vanuatu",capital:"Port Vila"},{country:"Vatican City",capital:"Vatican City"},{country:"Venezuela",capital:"Caracas"},{country:"Vietnam",capital:"Hanoi"},{country:"Yemen",capital:"Sana'a"},{country:"Zambia",capital:"Lusaka"},{country:"Zimbabwe",capital:"Harare"}];
 
-    // Alternate accepted answers for tricky capitals
-    var ALT_ANSWERS = {
-      "Brasília": ["brasilia"],
-      "Yaoundé": ["yaounde"],
-      "Bogotá": ["bogota"],
-      "San José": ["san jose"],
-      "N'Djamena": ["ndjamena", "n djamena"],
-      "Chișinău": ["chisinau", "kishinev"],
-      "São Tomé": ["sao tome"],
-      "Asunción": ["asuncion"],
-      "Lomé": ["lome"],
-      "Nukuʻalofa": ["nukualofa", "nuku alofa"],
-      "Malé": ["male", "malay"],
-      "Sri Jayawardenepura Kotte": ["sri jayawardenepura kotte", "kotte", "sri jayawardenepura"],
-      "Naypyidaw": ["naypyidaw", "nay pyi taw"],
-      "Ouagadougou": ["ouagadougou", "wagadugu"],
-      "Antananarivo": ["antananarivo"],
-      "Ulaanbaatar": ["ulaanbaatar", "ulan bator"],
-      "Tbilisi": ["tbilisi"],
-      "Ljubljana": ["ljubljana"],
-      "Reykjavik": ["reykjavik"],
-      "Tegucigalpa": ["tegucigalpa"],
-      "Yamoussoukro": ["yamoussoukro"],
-      "Paramaribo": ["paramaribo"],
-      "Belmopan": ["belmopan"],
-      "Dushanbe": ["dushanbe"],
-      "Thimphu": ["thimphu", "timphu"],
-      "Bishkek": ["bishkek"],
-      "Ashgabat": ["ashgabat", "ashkhabad"],
-      "Tashkent": ["tashkent"],
-      "Vientiane": ["vientiane"],
-      "Bandar Seri Begawan": ["bandar seri begawan"],
-      "Ngerulmud": ["ngerulmud"],
-      "Funafuti": ["funafuti"],
-      "Washington, D.C.": ["washington", "washington dc", "washington d c", "washington d.c."],
-      "Luxembourg City": ["luxembourg", "luxembourg city"],
-      "Kuwait City": ["kuwait", "kuwait city"],
-      "Guatemala City": ["guatemala", "guatemala city"],
-      "Mexico City": ["mexico city", "mexico"],
-      "Panama City": ["panama city", "panama"],
-      "Vatican City": ["vatican city", "vatican"],
-      "Singapore": ["singapore"],
-      "Djibouti": ["djibouti"],
-      "Monaco": ["monaco"],
-      "San Marino": ["san marino"],
-    };
+    var ALT_ANSWERS={"Bras\u00edlia":["brasilia"],"Yaound\u00e9":["yaounde"],"Bogot\u00e1":["bogota"],"San Jos\u00e9":["san jose"],"N'Djamena":["ndjamena","n djamena"],"Chi\u0219in\u0103u":["chisinau","kishinev"],"S\u00e3o Tom\u00e9":["sao tome"],"Asunci\u00f3n":["asuncion"],"Lom\u00e9":["lome"],"Nuku\u02bbalofa":["nukualofa","nuku alofa"],"Mal\u00e9":["male","malay"],"Sri Jayawardenepura Kotte":["kotte","sri jayawardenepura"],"Naypyidaw":["nay pyi taw"],"Ouagadougou":["wagadugu"],"Ulaanbaatar":["ulan bator"],"Washington, D.C.":["washington","washington dc","washington d c"],"Luxembourg City":["luxembourg"],"Kuwait City":["kuwait"],"Guatemala City":["guatemala"],"Mexico City":["mexico city","mexico"],"Panama City":["panama city","panama"]};
 
-    function normalize(str) {
-      return str
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // strip accents
-        .replace(/[^a-z0-9 ]/gi, "") // remove punctuation
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, " ");
-    }
-
-    function isMatch(spoken, correct) {
-      var nSpoken = normalize(spoken);
-      var nCorrect = normalize(correct);
-
-      // Direct match
-      if (nSpoken === nCorrect) return true;
-
-      // Check if spoken contains the correct answer
-      if (nSpoken.indexOf(nCorrect) !== -1) return true;
-      if (nCorrect.indexOf(nSpoken) !== -1 && nSpoken.length >= 3) return true;
-
-      // Check alt answers
-      var alts = ALT_ANSWERS[correct];
-      if (alts) {
-        for (var i = 0; i < alts.length; i++) {
-          if (nSpoken === normalize(alts[i])) return true;
-          if (nSpoken.indexOf(normalize(alts[i])) !== -1) return true;
-        }
-      }
-
-      // Levenshtein distance for close matches (typos / mishearing)
-      if (nCorrect.length >= 4 && levenshtein(nSpoken, nCorrect) <= Math.max(2, Math.floor(nCorrect.length * 0.3))) {
-        return true;
-      }
-
+    function normalize(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/gi,"").toLowerCase().trim().replace(/\s+/g," ")}
+    function isMatch(spoken,correct){
+      var a=normalize(spoken),b=normalize(correct);
+      if(a===b)return true;
+      if(a.indexOf(b)!==-1)return true;
+      if(b.indexOf(a)!==-1&&a.length>=3)return true;
+      var alts=ALT_ANSWERS[correct];
+      if(alts)for(var i=0;i<alts.length;i++){var n=normalize(alts[i]);if(a===n||a.indexOf(n)!==-1)return true}
+      if(b.length>=4&&levenshtein(a,b)<=Math.max(2,Math.floor(b.length*0.3)))return true;
       return false;
     }
-
-    function levenshtein(a, b) {
-      var m = a.length, n = b.length;
-      var dp = [];
-      for (var i = 0; i <= m; i++) {
-        dp[i] = [i];
-        for (var j = 1; j <= n; j++) {
-          dp[i][j] = i === 0 ? j : 0;
-        }
-      }
-      for (var i = 1; i <= m; i++) {
-        for (var j = 1; j <= n; j++) {
-          if (a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1];
-          else dp[i][j] = 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-        }
-      }
+    function levenshtein(a,b){
+      var m=a.length,n=b.length,dp=[];
+      for(var i=0;i<=m;i++){dp[i]=[i];for(var j=1;j<=n;j++)dp[i][j]=i===0?j:0}
+      for(var i=1;i<=m;i++)for(var j=1;j<=n;j++){if(a[i-1]===b[j-1])dp[i][j]=dp[i-1][j-1];else dp[i][j]=1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])}
       return dp[m][n];
     }
+    function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
 
-    function shuffle(arr) {
-      var a = arr.slice();
-      for (var i = a.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = a[i]; a[i] = a[j]; a[j] = t;
-      }
-      return a;
+    var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    var hasSpeechRecognition=!!SpeechRecognition;
+    var MASTERY_THRESHOLD=3, REINSERT_DISTANCE=10;
+
+    function speak(text,onEnd){
+      window.speechSynthesis.cancel();
+      var u=new SpeechSynthesisUtterance(text);u.rate=0.85;u.pitch=1.0;
+      if(onEnd)u.onend=onEnd;
+      window.speechSynthesis.speak(u);
     }
 
-    // Check for speech recognition support
-    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    var hasSpeechRecognition = !!SpeechRecognition;
-    var speechSynthesis = window.speechSynthesis;
+    function App(){
+      var _q=useState(function(){return shuffle(COUNTRIES)}),queue=_q[0],setQueue=_q[1];
+      var _i=useState(0),index=_i[0],setIndex=_i[1];
+      var _r=useState(false),revealed=_r[0],setRevealed=_r[1];
+      var _s=useState({correct:0,incorrect:0}),score=_s[0],setScore=_s[1];
+      var _f=useState(false),finished=_f[0],setFinished=_f[1];
+      var _st=useState({}),streaks=_st[0],setStreaks=_st[1];
+      var _m=useState(function(){return new Set()}),mastered=_m[0],setMastered=_m[1];
+      var _t=useState(function(){return new Set()}),troubleCountries=_t[0],setTroubleCountries=_t[1];
+      var _mode=useState("manual"),mode=_mode[0],setMode=_mode[1];
+      var _lis=useState(false),listening=_lis[0],setListening=_lis[1];
+      var _tr=useState(""),transcript=_tr[0],setTranscript=_tr[1];
+      var _res=useState(null),result=_res[0],setResult=_res[1];
+      var _sp=useState(false),speaking=_sp[0],setSpeaking=_sp[1];
+      var _aa=useState(false),autoAsked=_aa[0],setAutoAsked=_aa[1];
+      var recognitionRef=useRef(null);
+      var processAnswerRef=useRef(null);
+      var handleNextVoiceRef=useRef(null);
 
-    var MASTERY_THRESHOLD = 3;
-    var REINSERT_DISTANCE = 10;
+      var current=index<queue.length?queue[index]:null;
+      var totalMastered=mastered.size, totalCountries=COUNTRIES.length;
+      var isDone=!current||totalMastered===totalCountries;
 
-    function speak(text, onEnd) {
-      speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.rate = 0.95;
-      u.pitch = 1.0;
-      if (onEnd) u.onend = onEnd;
-      speechSynthesis.speak(u);
-    }
-
-    function App() {
-      var _queue = useState(function() { return shuffle(COUNTRIES); });
-      var queue = _queue[0], setQueue = _queue[1];
-      var _idx = useState(0);
-      var index = _idx[0], setIndex = _idx[1];
-      var _rev = useState(false);
-      var revealed = _rev[0], setRevealed = _rev[1];
-      var _score = useState({ correct: 0, incorrect: 0 });
-      var score = _score[0], setScore = _score[1];
-      var _fin = useState(false);
-      var finished = _fin[0], setFinished = _fin[1];
-      var _streaks = useState({});
-      var streaks = _streaks[0], setStreaks = _streaks[1];
-      var _mastered = useState(function() { return new Set(); });
-      var mastered = _mastered[0], setMastered = _mastered[1];
-      var _trouble = useState(function() { return new Set(); });
-      var troubleCountries = _trouble[0], setTroubleCountries = _trouble[1];
-
-      // Voice-specific state
-      var _mode = useState("manual");
-      var mode = _mode[0], setMode = _mode[1];
-      var _listening = useState(false);
-      var listening = _listening[0], setListening = _listening[1];
-      var _transcript = useState("");
-      var transcript = _transcript[0], setTranscript = _transcript[1];
-      var _result = useState(null); // { correct: bool, spoken: string }
-      var result = _result[0], setResult = _result[1];
-      var _speaking = useState(false);
-      var speaking = _speaking[0], setSpeaking = _speaking[1];
-      var _autoAsked = useState(false);
-      var autoAsked = _autoAsked[0], setAutoAsked = _autoAsked[1];
-
-      var recognitionRef = useRef(null);
-
-      var current = index < queue.length ? queue[index] : null;
-      var totalMastered = mastered.size;
-      var totalCountries = COUNTRIES.length;
-      var isDone = !current || totalMastered === totalCountries;
-
-      // Auto-speak the question in voice mode
-      useEffect(function() {
-        if (mode === "voice" && current && !revealed && !result && !autoAsked) {
-          setSpeaking(true);
-          setAutoAsked(true);
-          speak("What is the capital of " + current.country + "?", function() {
-            setSpeaking(false);
-          });
-          // Safety timeout — sometimes onend never fires
-          var safetyTimer = setTimeout(function() { setSpeaking(false); }, 5000);
-          return function() { clearTimeout(safetyTimer); };
+      // Auto-speak in voice mode
+      useEffect(function(){
+        if(mode==="voice"&&current&&!revealed&&!result&&!autoAsked){
+          setSpeaking(true);setAutoAsked(true);
+          speak("What is the capital of "+current.country+"?",function(){setSpeaking(false)});
+          var t=setTimeout(function(){setSpeaking(false)},5000);
+          return function(){clearTimeout(t)};
         }
-      }, [mode, current, revealed, result, autoAsked]);
+      },[mode,current,revealed,result,autoAsked]);
 
-      // Refs for keyboard handler (avoids stale closures)
-      var processAnswerRef = useRef(null);
-      var handleNextVoiceRef = useRef(null);
-
-      function startListening() {
-        if (!hasSpeechRecognition) return;
-        speechSynthesis.cancel();
-        setSpeaking(false);
-
-        // Stop any previous recognition
-        if (recognitionRef.current) {
-          try { recognitionRef.current.abort(); } catch(ex) {}
-        }
-
-        var recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.lang = "en-US";
-        recognitionRef.current = recognition;
-
-        recognition.onstart = function() { setListening(true); };
-        recognition.onresult = function(event) {
-          var t = "";
-          for (var i = 0; i < event.results.length; i++) {
-            t += event.results[i][0].transcript;
-          }
+      function startListening(){
+        if(!hasSpeechRecognition)return;
+        window.speechSynthesis.cancel();setSpeaking(false);
+        if(recognitionRef.current)try{recognitionRef.current.abort()}catch(ex){}
+        var rec=new SpeechRecognition();
+        rec.continuous=false;rec.interimResults=true;rec.lang="en-US";
+        recognitionRef.current=rec;
+        rec.onstart=function(){setListening(true)};
+        rec.onresult=function(ev){
+          var t="";for(var i=0;i<ev.results.length;i++)t+=ev.results[i][0].transcript;
           setTranscript(t);
-
-          // Check if final result
-          if (event.results[event.results.length - 1].isFinal) {
-            setListening(false);
-            checkAnswer(t);
-          }
+          if(ev.results[ev.results.length-1].isFinal){setListening(false);checkAnswer(t)}
         };
-        recognition.onerror = function(ev) {
+        rec.onerror=function(ev){
           setListening(false);
-          if (ev.error === "no-speech") {
-            setTranscript("(No speech detected \u2014 try again)");
-          } else if (ev.error === "not-allowed") {
-            setTranscript("(Microphone access denied \u2014 please allow mic in browser settings)");
-          }
+          if(ev.error==="no-speech")setTranscript("(No speech detected \u2014 try again)");
+          else if(ev.error==="not-allowed")setTranscript("(Microphone access denied \u2014 please allow mic in browser settings)");
         };
-        recognition.onend = function() { setListening(false); };
-
-        recognitionRef.current = recognition;
-        setTranscript("");
-        setResult(null);
-        recognition.start();
+        rec.onend=function(){setListening(false)};
+        setTranscript("");setResult(null);rec.start();
       }
 
-      function checkAnswer(spoken) {
-        var correct = isMatch(spoken, current.capital);
-        setResult({ correct: correct, spoken: spoken });
-
-        if (correct) {
-          speak("Correct! " + current.capital);
-        } else {
-          speak("Not quite. The answer is " + current.capital);
-        }
+      function checkAnswer(spoken){
+        var correct=isMatch(spoken,current.capital);
+        setResult({correct:correct,spoken:spoken});
+        if(correct)speak("Correct! "+current.capital);
+        else speak("Not quite. The answer is "+current.capital);
       }
 
-      function processAnswer(gotIt) {
-        var country = current.country;
-        var currentStreak = streaks[country] || 0;
-
-        setScore({ correct: score.correct + (gotIt ? 1 : 0), incorrect: score.incorrect + (gotIt ? 0 : 1) });
-
-        var isTrouble = troubleCountries.has(country);
-
-        if (gotIt) {
-          if (!isTrouble) {
-            setMastered(function(prev) { return new Set([].concat(Array.from(prev), [country])); });
+      function processAnswer(gotIt){
+        var country=current.country;
+        var currentStreak=streaks[country]||0;
+        setScore({correct:score.correct+(gotIt?1:0),incorrect:score.incorrect+(gotIt?0:1)});
+        var isTrouble=troubleCountries.has(country);
+        if(gotIt){
+          if(!isTrouble){
+            setMastered(function(p){return new Set([].concat(Array.from(p),[country]))});
           } else {
-            var newStreak = currentStreak + 1;
-            var ns = Object.assign({}, streaks); ns[country] = newStreak;
-            setStreaks(ns);
-            if (newStreak >= MASTERY_THRESHOLD) {
-              setMastered(function(prev) { return new Set([].concat(Array.from(prev), [country])); });
-            } else {
-              var nq = queue.slice(); nq.push(current); setQueue(nq);
-            }
+            var ns=currentStreak+1;
+            var o=Object.assign({},streaks);o[country]=ns;setStreaks(o);
+            if(ns>=MASTERY_THRESHOLD)setMastered(function(p){return new Set([].concat(Array.from(p),[country]))});
+            else{var nq=queue.slice();nq.push(current);setQueue(nq)}
           }
         } else {
-          var ns2 = Object.assign({}, streaks); ns2[country] = 0;
-          setStreaks(ns2);
-          setTroubleCountries(function(prev) { return new Set([].concat(Array.from(prev), [country])); });
-          var nq2 = queue.slice();
-          var insertAt = Math.min(index + 1 + REINSERT_DISTANCE, nq2.length);
-          nq2.splice(insertAt, 0, current);
-          setQueue(nq2);
+          var o2=Object.assign({},streaks);o2[country]=0;setStreaks(o2);
+          setTroubleCountries(function(p){return new Set([].concat(Array.from(p),[country]))});
+          var nq2=queue.slice();nq2.splice(Math.min(index+1+REINSERT_DISTANCE,nq2.length),0,current);setQueue(nq2);
         }
-
-        setIndex(index + 1);
-        setRevealed(false);
-        setResult(null);
-        setTranscript("");
-        setAutoAsked(false);
+        setIndex(index+1);setRevealed(false);setResult(null);setTranscript("");setAutoAsked(false);
       }
 
-      function handleNextVoice() {
-        if (result) processAnswer(result.correct);
+      function handleNextVoice(){if(result)processAnswer(result.correct)}
+      function handleOverrideCorrect(){processAnswer(true)}
+
+      function handleRestart(){
+        window.speechSynthesis.cancel();
+        setQueue(shuffle(COUNTRIES));setIndex(0);setRevealed(false);
+        setScore({correct:0,incorrect:0});setStreaks({});
+        setMastered(new Set());setTroubleCountries(new Set());
+        setFinished(false);setResult(null);setTranscript("");setAutoAsked(false);
       }
 
-      function handleOverrideCorrect() {
-        // Let user override if speech recognition got it wrong
-        processAnswer(true);
-      }
-
-      function handleRestart() {
-        speechSynthesis.cancel();
-        setQueue(shuffle(COUNTRIES));
-        setIndex(0); setRevealed(false);
-        setScore({ correct: 0, incorrect: 0 });
-        setStreaks({}); setMastered(new Set());
-        setTroubleCountries(new Set());
-        setFinished(false); setResult(null);
-        setTranscript(""); setAutoAsked(false);
-      }
-
-      // Keep refs updated for keyboard handler
-      processAnswerRef.current = processAnswer;
-      handleNextVoiceRef.current = handleNextVoice;
+      // Keep refs current for keyboard handler
+      processAnswerRef.current=processAnswer;
+      handleNextVoiceRef.current=handleNextVoice;
 
       // Keyboard shortcuts
-      useEffect(function() {
-        function handleKey(ev) {
-          if (finished || isDone) return;
-          if (mode === "manual") {
-            if (ev.code === "Space" && !revealed) {
-              ev.preventDefault();
-              setRevealed(true);
-            } else if (ev.key === "1" && revealed) {
-              ev.preventDefault();
-              processAnswerRef.current(true);
-            } else if (ev.key === "3" && revealed) {
-              ev.preventDefault();
-              processAnswerRef.current(false);
-            }
+      useEffect(function(){
+        function handleKey(ev){
+          if(finished||isDone)return;
+          if(mode==="manual"){
+            if(ev.code==="Space"&&!revealed){ev.preventDefault();setRevealed(true)}
+            else if(ev.key==="1"&&revealed){ev.preventDefault();processAnswerRef.current(true)}
+            else if(ev.key==="3"&&revealed){ev.preventDefault();processAnswerRef.current(false)}
           }
-          if (mode === "voice" && result) {
-            if (ev.code === "Space") {
-              ev.preventDefault();
-              handleNextVoiceRef.current();
-            }
+          if(mode==="voice"&&result){
+            if(ev.code==="Space"){ev.preventDefault();handleNextVoiceRef.current()}
           }
         }
-        window.addEventListener("keydown", handleKey);
-        return function() { window.removeEventListener("keydown", handleKey); };
-      }, [mode, revealed, finished, isDone, result]);
+        window.addEventListener("keydown",handleKey);
+        return function(){window.removeEventListener("keydown",handleKey)};
+      },[mode,revealed,finished,isDone,result]);
 
       // FINISHED SCREEN
-      if (finished || isDone) {
-        var troubleList = Array.from(troubleCountries).sort();
-        var emoji = totalMastered === totalCountries ? "\uD83C\uDFC6" : totalMastered >= totalCountries * 0.8 ? "\uD83D\uDC4F" : "\uD83D\uDCAA";
-
-        return e("div", { className: "card" },
-          e("div", { className: "emoji-big" }, emoji),
-          e("h1", { className: "finish-title" }, "Quiz Complete!"),
-          e("p", { className: "finish-subtitle" },
-            "You mastered ", e("strong", null, totalMastered), " of ", e("strong", null, totalCountries), " countries"
+      if(finished||isDone){
+        var troubleList=Array.from(troubleCountries).sort();
+        var emoji=totalMastered===totalCountries?"\uD83C\uDFC6":totalMastered>=totalCountries*0.8?"\uD83D\uDC4F":"\uD83D\uDCAA";
+        return e("div",{className:"card"},
+          e("div",{className:"emoji-big"},emoji),
+          e("h1",{className:"finish-title"},"Quiz Complete!"),
+          e("p",{className:"finish-subtitle"},"You mastered ",e("strong",null,totalMastered)," of ",e("strong",null,totalCountries)," countries"),
+          e("div",{className:"stats-row"},
+            e("div",{className:"stat-box stat-box-green"},e("div",{className:"stat-num stat-num-green"},score.correct),e("div",{className:"stat-label"},"Correct")),
+            e("div",{className:"stat-box stat-box-red"},e("div",{className:"stat-num stat-num-red"},score.incorrect),e("div",{className:"stat-label"},"Incorrect")),
+            e("div",{className:"stat-box stat-box-orange"},e("div",{className:"stat-num stat-num-orange"},troubleList.length),e("div",{className:"stat-label"},"Tricky ones"))
           ),
-          e("div", { className: "stats-row" },
-            e("div", { className: "stat-box stat-box-green" },
-              e("div", { className: "stat-num stat-num-green" }, score.correct),
-              e("div", { className: "stat-label" }, "Correct")
-            ),
-            e("div", { className: "stat-box stat-box-red" },
-              e("div", { className: "stat-num stat-num-red" }, score.incorrect),
-              e("div", { className: "stat-label" }, "Incorrect")
-            ),
-            e("div", { className: "stat-box stat-box-orange" },
-              e("div", { className: "stat-num stat-num-orange" }, troubleList.length),
-              e("div", { className: "stat-label" }, "Tricky ones")
-            )
+          troubleList.length>0&&e("div",{className:"trouble-section"},
+            e("p",{className:"trouble-heading"},"Countries you found tricky:"),
+            e("div",{className:"trouble-list"},troubleList.map(function(c){
+              var entry=COUNTRIES.find(function(x){return x.country===c});
+              return e("div",{key:c,className:"trouble-row"},
+                e("span",null,c," \u2192 ",e("strong",null,entry?entry.capital:"")),
+                e("span",null,mastered.has(c)?"\u2705":"\u274C")
+              );
+            }))
           ),
-          troubleList.length > 0 && e("div", { className: "trouble-section" },
-            e("p", { className: "trouble-heading" }, "Countries you found tricky:"),
-            e("div", { className: "trouble-list" },
-              troubleList.map(function(c) {
-                var entry = COUNTRIES.find(function(x) { return x.country === c; });
-                var didMaster = mastered.has(c);
-                return e("div", { key: c, className: "trouble-row" },
-                  e("span", null, c, " \u2192 ", e("strong", null, entry ? entry.capital : "")),
-                  e("span", null, didMaster ? "\u2705" : "\u274C")
-                );
-              })
-            )
-          ),
-          e("button", { className: "btn btn-primary", onClick: handleRestart }, "Play Again")
+          e("button",{className:"btn btn-primary",onClick:handleRestart},"Play Again")
         );
       }
 
       // QUIZ SCREEN
-      var streakCount = streaks[current.country] || 0;
-      var isTroubleNow = troubleCountries.has(current.country);
-      var streakText = "";
-      if (isTroubleNow) {
-        var fires = ""; for (var i = 0; i < streakCount; i++) fires += "\uD83D\uDD25";
-        var circles = ""; for (var j = 0; j < MASTERY_THRESHOLD - streakCount; j++) circles += "\u26AA";
-        streakText = "Streak: " + fires + circles + " (" + streakCount + "/" + MASTERY_THRESHOLD + " to master)";
+      var streakCount=streaks[current.country]||0;
+      var isTroubleNow=troubleCountries.has(current.country);
+      var streakText="";
+      if(isTroubleNow){
+        var fires="";for(var i=0;i<streakCount;i++)fires+="\uD83D\uDD25";
+        var circles="";for(var j=0;j<MASTERY_THRESHOLD-streakCount;j++)circles+="\u26AA";
+        streakText="Streak: "+fires+circles+" ("+streakCount+"/"+MASTERY_THRESHOLD+" to master)";
       }
 
-      return e("div", { className: "card" },
+      return e("div",{className:"card"},
         // Mode toggle
-        e("div", { className: "mode-toggle" },
-          e("button", {
-            className: "mode-btn" + (mode === "voice" ? " active" : ""),
-            onClick: function() { setMode("voice"); speechSynthesis.cancel(); setResult(null); setTranscript(""); setAutoAsked(false); },
-            disabled: !hasSpeechRecognition
-          }, "\uD83C\uDF99\uFE0F Voice"),
-          e("button", {
-            className: "mode-btn" + (mode === "manual" ? " active" : ""),
-            onClick: function() { setMode("manual"); speechSynthesis.cancel(); setResult(null); setTranscript(""); }
-          }, "\uD83D\uDC46 Manual")
-        ),
-
-        !hasSpeechRecognition && mode === "manual" && e("div", { className: "warning" },
-          "Voice mode isn't supported in this browser. Use Chrome or Edge for voice input."
+        e("div",{className:"mode-toggle"},
+          e("button",{className:"mode-btn"+(mode==="voice"?" active":""),disabled:!hasSpeechRecognition,
+            onClick:function(){setMode("voice");window.speechSynthesis.cancel();setResult(null);setTranscript("");setAutoAsked(false)}
+          },"\uD83C\uDF99\uFE0F Voice"),
+          e("button",{className:"mode-btn"+(mode==="manual"?" active":""),
+            onClick:function(){setMode("manual");window.speechSynthesis.cancel();setResult(null);setTranscript("")}
+          },"\uD83D\uDC46 Manual")
         ),
 
         // Progress
-        e("div", { className: "progress-row" },
-          e("span", { className: "progress-label" }, "Mastered: " + totalMastered + " / " + totalCountries),
-          e("span", { className: "progress-label" }, "\u2705 " + score.correct + "  \u274C " + score.incorrect)
+        e("div",{className:"progress-row"},
+          e("span",{className:"progress-label"},"Mastered: "+totalMastered+" / "+totalCountries),
+          e("span",{className:"progress-label"},"\u2705 "+score.correct+"  \u274C "+score.incorrect)
         ),
-        e("div", { className: "progress-track" },
-          e("div", { className: "progress-fill", style: { width: (totalMastered / totalCountries * 100) + "%" } })
-        ),
-        e("div", { className: "streak-info" }, streakText),
+        e("div",{className:"progress-track"},e("div",{className:"progress-fill",style:{width:(totalMastered/totalCountries*100)+"%"}})),
+        e("div",{className:"streak-info"},streakText),
 
         // Question
-        e("p", { className: "question-label" }, "What is the capital of\u2026"),
-        e("h1", { className: "country-name" }, current.country),
+        e("p",{className:"question-label"},"What is the capital of\u2026"),
+        e("h1",{className:"country-name"},current.country),
 
-        // VOICE MODE
-        mode === "voice" && !result && e("div", { className: "mic-area" },
-          e("button", {
-            className: "mic-btn" + (listening ? " listening" : ""),
-            onClick: startListening,
-            disabled: listening
-          }, "\uD83C\uDF99\uFE0F"),
-          e("p", { className: "mic-hint" },
-            listening ? "Listening..." : speaking ? "Speaking... (tap mic when ready)" : "Tap the mic and say your answer"
-          ),
-          transcript && e("div", { className: "transcript" }, '"' + transcript + '"')
+        // VOICE MODE — listening
+        mode==="voice"&&!result&&e("div",{className:"mic-area"},
+          e("button",{className:"mic-btn"+(listening?" listening":""),onClick:startListening,disabled:listening},"\uD83C\uDF99\uFE0F"),
+          e("p",{className:"mic-hint"},listening?"Listening...":speaking?"Speaking... (tap mic when ready)":"Tap the mic and say your answer"),
+          transcript&&e("div",{className:"transcript"},'"'+transcript+'"')
         ),
 
-        mode === "voice" && result && e("div", null,
-          e("div", { className: "result-box " + (result.correct ? "result-correct" : "result-wrong") },
-            result.correct ? "\u2705 Correct!" : "\u274C Not quite!",
-            e("div", { className: "correct-answer" },
-              result.correct
-                ? 'You said: "' + result.spoken + '"'
-                : 'You said: "' + result.spoken + '" \u2014 the answer is ' + current.capital
+        // VOICE MODE — result
+        mode==="voice"&&result&&e("div",null,
+          e("div",{className:"result-box "+(result.correct?"result-correct":"result-wrong")},
+            result.correct?"\u2705 Correct!":"\u274C Not quite!",
+            e("div",{className:"correct-answer"},
+              result.correct?'You said: "'+result.spoken+'"':'You said: "'+result.spoken+'" \u2014 the answer is '+current.capital
             ),
-            e("button", {
-              className: "speak-btn",
-              onClick: function() { speak(current.capital); },
-              title: "Hear pronunciation",
-              style: { marginTop: 8 }
-            }, "\uD83D\uDD0A Hear it")
+            e("button",{className:"speak-btn",onClick:function(){speak(current.capital)},style:{marginTop:8}},"\uD83D\uDD0A Hear it")
           ),
-          e("div", { style: { display: "flex", gap: 10, justifyContent: "center", marginTop: 16, flexWrap: "wrap" } },
-            e("button", { className: "btn btn-primary", onClick: handleNextVoice }, "Next Country \u2192"),
-            !result.correct && e("button", {
-              className: "btn", style: { background: "#2e7d32", color: "white" },
-              onClick: handleOverrideCorrect
-            }, "Actually I was right!"),
-            result.correct && e("button", {
-              className: "btn", style: { background: "#c62828", color: "white" },
-              onClick: function() { setResult({ correct: false, spoken: result.spoken }); }
-            }, "Actually I was wrong")
+          e("div",{style:{display:"flex",gap:10,justifyContent:"center",marginTop:16,flexWrap:"wrap"}},
+            e("button",{className:"btn btn-primary",onClick:handleNextVoice},"Next Country \u2192"),
+            !result.correct&&e("button",{className:"btn",style:{background:"#2e7d32",color:"white"},onClick:handleOverrideCorrect},"Actually I was right!"),
+            result.correct&&e("button",{className:"btn",style:{background:"#c62828",color:"white"},onClick:function(){setResult({correct:false,spoken:result.spoken})}},"Actually I was wrong")
           ),
-          e("button", { className: "btn-skip", onClick: function() { setResult(null); setTranscript(""); startListening(); } }, "Try again")
+          e("button",{className:"btn-skip",onClick:function(){setResult(null);setTranscript("");startListening()}},"Try again")
         ),
 
-        // MANUAL MODE
-        mode === "manual" && !revealed && e("div", null,
-          e("button", {
-            className: "btn btn-primary",
-            onClick: function() { setRevealed(true); },
-            style: { padding: "16px 48px", fontSize: 18, borderRadius: 14, boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)" }
-          }, "Reveal Answer"),
-          e("p", { style: { fontSize: 12, color: "#aaa", marginTop: 10 } }, "or press Space"),
-          e("button", { className: "btn-skip", onClick: function() {
-            var nq = queue.slice(); nq.push(current); setQueue(nq); setIndex(index + 1);
-          }}, "Skip this one")
+        // MANUAL MODE — not revealed
+        mode==="manual"&&!revealed&&e("div",null,
+          e("button",{className:"btn btn-primary",onClick:function(){setRevealed(true)},
+            style:{padding:"16px 48px",fontSize:18,borderRadius:14,boxShadow:"0 4px 15px rgba(102,126,234,0.4)"}},"Reveal Answer"),
+          e("p",{className:"hint"},"or press Space"),
+          e("button",{className:"btn-skip",onClick:function(){var nq=queue.slice();nq.push(current);setQueue(nq);setIndex(index+1)}},"Skip this one")
         ),
 
-        mode === "manual" && revealed && e("div", null,
-          e("div", { className: "result-box", style: { background: "#f0f4ff" } },
-            e("p", { style: { margin: 0, fontSize: 32, fontWeight: 700, color: "#4a3f8a" } }, current.capital),
-            e("button", {
-              className: "speak-btn",
-              onClick: function() { speak(current.capital); },
-              title: "Hear pronunciation"
-            }, "\uD83D\uDD0A")
+        // MANUAL MODE — revealed
+        mode==="manual"&&revealed&&e("div",null,
+          e("div",{className:"answer-box"},
+            e("p",{className:"answer-text"},current.capital),
+            e("button",{className:"speak-btn",onClick:function(){speak(current.capital)},title:"Hear pronunciation"},"\uD83D\uDD0A Hear it")
           ),
-          e("p", { style: { color: "#666", fontSize: 15, margin: "12px 0 16px" } }, "Did you get it right?"),
-          e("div", { style: { display: "flex", gap: 12, justifyContent: "center" } },
-            e("button", { className: "btn", style: { background: "#2e7d32", color: "white" }, onClick: function() { processAnswer(true); } }, "\u2713 Got it! (1)"),
-            e("button", { className: "btn", style: { background: "#c62828", color: "white" }, onClick: function() { processAnswer(false); } }, "\u2717 Nope (3)")
+          e("p",{style:{color:"#666",fontSize:15,margin:"12px 0 16px"}},"Did you get it right?"),
+          e("div",{style:{display:"flex",gap:12,justifyContent:"center"}},
+            e("button",{className:"btn",style:{background:"#2e7d32",color:"white"},onClick:function(){processAnswer(true)}},"\u2713 Got it!"),
+            e("button",{className:"btn",style:{background:"#c62828",color:"white"},onClick:function(){processAnswer(false)}},"\u2717 Nope")
           ),
-          e("p", { style: { fontSize: 12, color: "#aaa", marginTop: 10 } }, "Press 1 = got it, 3 = nope")
+          e("p",{className:"hint"},"Press 1 = got it, 3 = nope")
         ),
 
         // Skip in voice mode
-        mode === "voice" && !result && !listening && !speaking && e("button", { className: "btn-skip", onClick: function() {
-          var nq = queue.slice(); nq.push(current); setQueue(nq);
-          setIndex(index + 1); setTranscript(""); setAutoAsked(false);
-        }}, "Skip this one")
+        mode==="voice"&&!result&&!listening&&!speaking&&e("button",{className:"btn-skip",onClick:function(){
+          var nq=queue.slice();nq.push(current);setQueue(nq);setIndex(index+1);setTranscript("");setAutoAsked(false);
+        }},"Skip this one")
       );
     }
 
